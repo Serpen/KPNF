@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<notfalldatenmodul>
+	<name>Koerpermaße</name>
+	<version>1.0</version>
+	<maintainer>FEK, Serpen</maintainer>
+	<history />
+	<parameter>
+		<param>pat</param>
+		<param>DaysLookBack</param>
+	</parameter>
+	<xsl>
+		<type>bmis</type>
+		<subtype>bmi</subtype>
+		<columns>
+			<column id="dat"    type="date">Datum</column>
+			<column id="weight" type="number">Gewicht</column>
+			<column id="height" type="number">Groeße</column>
+			<column id="bmi"    type="number">BMI</column>
+		</columns>
+	</xsl>
+	<sql>
+SELECT docd AS dat, weight, height, round(bmi,2) AS bmi 
+FROM n2343bdm 
+WHERE pat = :pat AND docd >= sysdate - :DaysLookBack
+ORDER BY dat
+	</sql>
+	<converter default="true">Convert-QueryToXML</converter>
+</notfalldatenmodul>

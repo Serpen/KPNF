@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<notfalldatenmodul>
+	<name>Ein- und Ausfuhr Bilanz</name>
+	<version>0.9.1</version>
+	<maintainer>FEK, Serpen</maintainer>
+	<history />
+	<parameter>
+		<param>pat</param>
+		<param>DaysLookBack</param>
+	</parameter>
+	<xsl>
+		<type>iao_bilanz</type>
+		<subtype>iao_bilanz_eintrag</subtype>
+		<headline>Ein- und Ausfuhr Bilanz</headline>
+		<columns>
+			<column id="valts" type="date">Datum</column>
+			<column id="typ"   type="text">Name</column>
+			<column id="val"   type="text">Wert</column>
+		</columns>
+	</xsl>
+	<sql>
+SELECT
+	TRUNC(n2330vdc.valts) AS valts,
+	CASE n2330vdc.typ
+		WHEN 'IAO_LIQ1QUAN_FL' THEN 'Summe Einfuhr'
+		WHEN 'IAO_URIN1QUAN_FL' THEN 'Summe Ausfuhr'
+		WHEN 'IAO_VOMITUS1QUAN_FL' THEN 'Summe Ausfuhr'
+		WHEN 'IAO_DRAIN1QUAN_FL' THEN 'Summe Ausfuhr'
+		WHEN 'IAO_MISC1QUAN_FL' THEN 'Summe Ausfuhr'
+		ELSE typ
+  END AS typ,
+	SUM(n2330vdc.valfx) AS val
+FROM n2330vdc
+	LEFT JOIN x8201psr ON x8201psr.psr = n2330vdc.resp
+WHERE n2330vdc.pat = :pat
+	AND n2330vdc.stat = 'A'
+	AND (n2330vdc.typ = 'IAO_LIQ1QUAN_FL'
+		OR n2330vdc.typ in ('IAO_URIN1QUAN_FL','IAO_VOMITUS1QUAN_FL','IAO_DRAIN1QUAN_FL','IAO_MISC1QUAN_FL'))
+	AND n2330vdc.valts > SYSDATE - :DaysLookBack
+GROUP BY
+	TRUNC(n2330vdc.valts),
+	CASE n2330vdc.typ
+		WHEN 'IAO_LIQ1QUAN_FL' THEN 'Summe Einfuhr'
+		WHEN 'IAO_URIN1QUAN_FL' THEN 'Summe Ausfuhr'
+		WHEN 'IAO_VOMITUS1QUAN_FL' THEN 'Summe Ausfuhr'
+		WHEN 'IAO_DRAIN1QUAN_FL' THEN 'Summe Ausfuhr'
+		WHEN 'IAO_MISC1QUAN_FL' THEN 'Summe Ausfuhr'
+		ELSE typ
+	END AS typ
+ORDER BY valts, typ
+	</sql>
+	<converter default="true">Convert-QueryToXML</converter>
+</notfalldatenmodul>

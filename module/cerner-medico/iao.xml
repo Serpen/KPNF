@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<notfalldatenmodul>
+	<name>Ein- und Ausfuhr</name>
+	<version>1.0</version>
+	<maintainer>FEK, Serpen</maintainer>
+	<history />
+	<parameter>
+		<param>pat</param>
+		<param>DaysLookBack</param>
+	</parameter>
+	<xsl>
+		<type>iaos</type>
+		<subtype>iao</subtype>
+		<headline>Ein- und Ausfuhr</headline>
+		<columns>
+			<column id="valts" type="date">Datum</column>
+			<column id="des"   type="text">Name</column>
+			<column id="val"   type="text">Wert</column>
+			<column id="namechr"  type="text">Verantwortlicher</column>
+		</columns>
+	</xsl>
+	<sql>
+SELECT	
+    itd as vdc, 
+		docd AS valts,
+		itc as Des, 
+		itc as typ, 
+		to_char(amnt) as val, 
+		cruser AS namechr
+FROM n2342itd
+	WHERE pat = :pat
+	AND state = 0
+	AND docd > SYSDATE - :DaysLookBack
+  
+UNION ALL
+
+SELECT	
+    exc as vdc, 
+		docd AS valts,
+		typ as Des, 
+		typ as typ, 
+		to_char(amo) as val, 
+		cruser AS namechr
+FROM n2346exc
+	WHERE pat = :pat
+	AND state = 0
+	AND docd > SYSDATE - :DaysLookBack
+  
+ORDER BY valts
+	</sql>
+	<converter default="true">Convert-QueryToXML</converter>
+</notfalldatenmodul>

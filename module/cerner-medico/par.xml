@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<notfalldatenmodul>
+	<name>Angehörige</name>
+	<version>0.9</version>
+	<maintainer>FEK, Serpen</maintainer>
+	<history />
+	<parameter>
+		<param>pat</param>
+	</parameter>
+	<xsl>
+		<type>angehoerige</type>
+		<subtype>angehoeriger</subtype>
+		<columns>
+			<column id="rre"     type="text">Art</column>
+			<column id="namechr" type="text">Name</column>
+			<column id="phone"   type="text">Telefon</column>
+			<column id="text"    type="text">Bemerkung</column>
+		</columns>
+	</xsl>
+	<sql>
+SELECT rre, namechr, phone, text
+FROM x1108par
+WHERE pat = :pat
+ORDER BY namechr
+	</sql>
+	<converter default="true">Convert-QueryToXML</converter>
+</notfalldatenmodul>

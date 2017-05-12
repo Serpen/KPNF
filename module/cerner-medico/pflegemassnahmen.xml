@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<notfalldatenmodul>
+	<name>Pflegemaßnahmen</name>
+	<version>0.9.1</version>
+	<maintainer>FEK, Serpen</maintainer>
+	<history />
+	<parameter>
+		<param>pat</param>
+		<param>DaysLookBack</param>
+	</parameter>
+	<xsl>
+		<type>pflegemassnahmen</type>
+		<subtype>pflegemassnahme</subtype>
+		<columns>
+			<column id="des1"    type="text">Maßnahme</column>
+			<column id="datf"    type="date">Von</column>
+			<column id="datt"    type="date">Bis</column>
+			<column id="details" type="text">Häufigkeit</column>
+			<column id="dur"     type="number">Dauer</column>
+		</columns>
+	</xsl>
+	<sql>
+SELECT n7010srv.des AS des1, n7002prg.des AS des2, n1011sps.datf, n1011sps.datt, dur,
+	CASE to_char(details)
+		WHEN '&lt;?xml version="1.0"?&gt;&lt;Root&gt;&lt;Items&gt;&lt;Typ0 /&gt;&lt;/Items&gt;&lt;/Root&gt;' THEN 'bei Bedarf'
+		WHEN '&lt;?xml version="1.0"?&gt;&lt;Root&gt;&lt;Items&gt;&lt;Typ7&gt;&lt;NOT&gt;1&lt;/NOT&gt;&lt;/Typ7&gt;&lt;/Items&gt;&lt;/Root&gt;' THEN '1 malige Durchfuehrung'
+		ELSE 'unbekanntes Serienschema'
+	END AS details
+FROM n1010spl
+  JOIN n1011sps USING (spl)
+  LEFT JOIN n7002prg USING (prg)
+  JOIN n7010srv USING (cat,srv)
+WHERE pat = :pat 
+	AND state=0
+	AND SYSDATE BETWEEN n1011sps.datf-: DaysLookBack AND n1011sps.datt + :DaysLookBack 
+ORDER BY n7010srv.des
+	</sql>
+	<converter default="true">Convert-QueryToXML</converter>
+</notfalldatenmodul>

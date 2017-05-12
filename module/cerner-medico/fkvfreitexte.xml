@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<notfalldatenmodul>
+	<name>Fieberkurven Freitexte</name>
+	<version>0.9</version>
+	<maintainer>FEK, Serpen</maintainer>
+	<history />
+	<parameter>
+		<param>pat</param>
+		<param>DaysLookBack</param>
+	</parameter>
+	<xsl>
+		<type>fkvfreitext</type>
+		<subtype>fkvfreitexteintrag</subtype>
+		<headline>Fieberkurven Freitexte</headline>
+		<columns>
+			<column id="datf" type="date">Datum von</column>
+			<column id="datt" type="date">Datum bis</column>
+			<column id="des"  type="text">Beschreibung</column>
+			<column id="text" type="text">Wert</column>
+		</columns>
+	</xsl>
+	<sql>
+SELECT des, text, n2345ftx.datf, n2345ftx.datt
+FROM n2345ftx JOIN n5817ftt USING (ftt)
+WHERE
+  pat = :Pat 
+  AND SYSDATE BETWEEN n2345ftx.datf - :DaysLookBack AND n2345ftx.datt + :DaysLookBack
+  AND state=0
+ORDER BY datf
+	</sql>
+	<converter default="true">Convert-QueryToXML</converter>
+</notfalldatenmodul>

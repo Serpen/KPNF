@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<notfalldatenmodul>
+	<name>Medikation</name>
+	<version>0.9</version>
+	<maintainer>FEK, Serpen</maintainer>
+	<history />
+	<parameter>
+		<param>pat</param>
+		<param>per</param>
+	</parameter>
+	<xsl>
+		<type>medikamente</type>
+		<subtype>medikament</subtype>
+		<headline>Medikation</headline>
+		<columns>
+			<column id="des"       type="text">Medikament</column>
+			<column id="wirkstoff" type="text">Wirkstoff</column>
+			<column id="adm_info" type="text">Frequenz</column>
+			<column id="adm_roa"   type="text">VF</column>
+			<column id="datf"  type="date">Von</column>
+			<column id="datt"  type="date">Bis</column>
+			<column id="periodicity"  type="text">Intervall</column>
+			<column id="status"  type="text">Status</column>
+			<column id="orderer"  type="text">Anordner</column>
+			<column id="orderts"  type="date">Anordnungsdatum</column>
+		</columns>
+	</xsl>
+	<sql>
+SELECT 
+	m2500mdc.mdc,
+	m2500mdc.des,
+	regexp_substr((SELECT LISTAGG(attval,'') WITHIN GROUP (ORDER BY attcol,attrow) wirkstoff FROM m2501mda WHERE m2501mda.att='MED_DESXL' AND m2501mda.mdc=m2500mdc.mdc AND attcol=0), '\[(.*)\]', 1, 1, 'i',1) AS wirkstoff,
+	(SELECT LISTAGG(attval,'') WITHIN GROUP (ORDER BY attcol,attrow) ADM_INFO FROM m2504doa WHERE m2504doa.att='ADM_INFO' AND m2504doa.dos=m2502mdo.dos AND attcol=0) AS ADM_INFO,
+	(SELECT LISTAGG(attval,'') WITHIN GROUP (ORDER BY attcol,attrow) ADD_ONDEMAND FROM m2504doa WHERE m2504doa.att='ADD_ONDEMAND' AND m2504doa.dos=m2502mdo.dos AND attcol=0) AS ADD_ONDEMAND,
+	(SELECT LISTAGG(attval,'') WITHIN GROUP (ORDER BY attcol,attrow) DOS_COMMENT FROM m2504doa WHERE m2504doa.att='DOS_COMMENT' AND m2504doa.dos=m2502mdo.dos) AS DOS_COMMENT,
+	CASE (SELECT LISTAGG(attval,'') WITHIN GROUP (ORDER BY attcol,attrow) ADM_ROA FROM m2504doa WHERE m2504doa.att='ADM_ROA' AND m2504doa.dos=m2502mdo.dos AND attcol=0)
+		WHEN 'T0029A4%OR' THEN 'oral'
+		WHEN 'T002AF2%SUB' THEN 'subcutan'
+		WHEN 'T0023CA%IVN' THEN 'i.v.'
+		WHEN 'T00232E%BP' THEN 'pulmonal'
+		WHEN 'T002AF0%RE' THEN 'rektal'
+		WHEN 'T002AEC%MH' THEN 'Mundhöhle'
+		WHEN 'T002AC3%TD' THEN 'transdermal'
+		WHEN 'T000018%IK' THEN 'intrakorporal'
+		WHEN 'GA00B71%EX' THEN 'topisch/extern'
+		WHEN 'T002287%PA' THEN 'parenteral'
+		WHEN 'V0001B1%INH' THEN 'inhalativ'
+		ELSE (SELECT LISTAGG(attval,'') WITHIN GROUP (ORDER BY attrow) ADM_ROA FROM m2504doa WHERE m2504doa.att='ADM_ROA' AND m2504doa.dos=m2502mdo.dos AND attcol=0)
+	END AS ADM_ROA,
+	CASE 
+		WHEN SYSDATE &gt; m2503dos.datt THEN 'abgesetzt'
+	ELSE
+		CASE m2503dos.status
+			WHEN 0 THEN 'aktiv'
+			WHEN 1 THEN 'vorgeschlagen'
+			WHEN 5 THEN 'pausiert'
+			WHEN 6 THEN 'aktiv, nachts pausiert'
+			WHEN 7 THEN 'prüfen (und pausiert)'
+			ELSE 'unbekannt'
+		END
+	END AS Status,
+	m2503dos.datf AS datf,
+	m2503dos.datt AS datt,
+	m2506ser.sertype,
+	m2506ser.weekdays,
+	m2506ser.periodicity,
+	x8201psr.namechr as orderer,
+	m2503dos.orderts AS orderts
+FROM m2500mdc
+	JOIN m2502mdo ON m2500mdc.mdc = m2502mdo.mdc
+	JOIN m2503dos ON m2502mdo.dos = m2503dos.dos
+	JOIN m2505dsr ON m2502mdo.dos = m2505dsr.dos
+	JOIN m2506ser USING (ser)
+	JOIN x8201psr ON x8201psr.psr = m2503dos.orderer
+WHERE
+	per = :per
+	AND doctype = 'PAT'
+	AND docunit = :pat
+	AND SYSDATE BETWEEN (m2503dos.datf-5) AND m2503dos.datt
+	AND NOT m2503dos.status = -5 --stoniert
+ORDER BY UPPER(des)
+	</sql>
+	<converter default="true">Convert-MedikationToXML</converter>
+</notfalldatenmodul>

@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<notfalldatenmodul>
+	<name>Anordnungen</name>
+	<version>0.9.1</version>
+	<maintainer>FEK, Serpen</maintainer>
+	<history />
+	<parameter>
+		<param>pat</param>
+		<param>DaysLookBack</param>
+	</parameter>
+	<xsl>
+		<type>anordnungen</type>
+		<subtype>anordnung</subtype>
+		<columns>
+			<column id="pland"    type="date">Zieltermin</column>
+			<column id="srvtxt"  type="text">Anordnung</column>
+			<column id="zusatztext" type="text">Zusatztext</column>
+			<column id="namechr"  type="text">Anordner</column>
+			<column id="state"    type="text">Status</column>
+			<column id="receiver" type="text">Empfänger</column>
+		</columns>
+	</xsl>
+	<sql>
+SELECT
+	n2500pld.srvtxt,
+	pland AS pland,
+  n2500pld.datf,
+	n2500pld.datt,
+	x8201psr.namechr AS namechr,
+	n2500pld.crstat AS state,
+	(select LISTAGG(ftxt,'') WITHIN GROUP (ORDER BY posno) ftxt from n2991txt where n2500pld.ftxt = 1 and pld = n2991txt.tpk and n2991txt.tab = 'PLD') || '/' || (select LISTAGG(ftxt,'') WITHIN GROUP (ORDER BY posno) ftxt from n2991txt where n2500pld.cond = 1 and pld = n2991txt.tpk and n2991txt.tab = 'PLD') AS zusatztext,
+	'' AS receiver
+	
+FROM n2600mdc
+	JOIN n2500pld USING (pld, pat)
+	JOIN x8201psr ON x8201psr.psr = n2500pld.resp
+
+WHERE pat = :pat
+	AND SYSDATE BETWEEN n2500pld.datf AND n2500pld.datt
+	AND n2600mdc.pland BETWEEN SYSDATE AND SYSDATE + :DaysLookBack
+
+ORDER BY pland, srvtxt
+	</sql>
+	<converter default="true">Convert-QueryToXML</converter>
+</notfalldatenmodul>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<notfalldatenmodul>
+	<name>Laborwerte</name>
+	<version>0.9</version>
+	<maintainer>FEK, Serpen</maintainer>
+	<history />
+	<parameter>
+		<param>pat</param>
+	</parameter>
+	<xsl>
+		<type>labor</type>
+		<subtype>lab</subtype>
+		<headline>Laborwerte</headline>
+		<columns>
+			<column id="printdate" type="date">Datum</column>
+			<column id="des"       type="text">Text</column>
+			<column id="val"       type="text">Wert</column>
+			<column id="uni"       type="text">Einheit</column>
+			<column id="rpsrange"  type="text">Referenzbereich</column>
+			<column id="flags"     type="text">Flag</column>
+		</columns>
+	</xsl>
+	<sql>
+WITH rpsTime AS (
+	SELECT r.id, max(r.CRD) as mcrd
+	FROM x1580rps r
+	WHERE
+		r.pat = :pat
+		AND NOT r.id = '23611'
+		AND NOT r.val='!folgt' 
+		AND NOT r.val='!storno'
+	GROUP BY r.id
+)
+SELECT x1580rps.id, printdate, des, val, uni, rpsrange, flags
+FROM x1580rps
+	LEFT JOIN x6500tar ON x1580rps.id=x6500tar.id
+	LEFT JOIN x1351dme ON dme = x1580rps.res
+	LEFT JOIN x1350dre USING (dre)
+	INNER JOIN rpsTime ON x1580rps.id=rpsTime.id and x1580rps.crd = rpsTime.mcrd
+WHERE 
+	x1580rps.pat = :pat
+	AND NOT x1580rps.id = '23611'
+	AND NOT x1580rps.val='!folgt' AND NOT x1580rps.val='!storno'
+ORDER BY UPPER(trim(des)), printdate
+	</sql>
+	<converter default="true">Convert-QueryToXML</converter>
+</notfalldatenmodul>

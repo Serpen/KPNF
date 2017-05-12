@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<notfalldatenmodul>
+	<name>Vitalparameter</name>
+	<version>0.9.1</version>
+	<maintainer>FEK, Serpen</maintainer>
+	<history />
+	<parameter>
+		<param>pat</param>
+		<param>DaysLookBack</param>
+	</parameter>
+	<xsl>
+		<type>vitalparameter</type>
+		<subtype>vitalparam</subtype>
+		<columns>
+			<column id="docd"  type="date">Datum</column>
+			<column id="rrsys" type="number">Systolischer Blutdruck</column>
+			<column id="rrdia" type="number">Diastolischer Blutdruck</column>
+			<column id="pulse" type="number">Puls</column>
+			<column id="tmp"   type="number">Temperatur</column>
+		</columns>
+	</xsl>
+	<sql>
+SELECT docd, typ, valfx 
+	FROM (
+		(SELECT
+			n2330vdc.docd,
+			CASE typ
+				WHEN 'VVL_TEMP1_FD' THEN 'Temperatur (WNPN)'
+				WHEN 'VVL_BLOODPR1_FL' THEN 'Blutdruck sys (WNPN)'
+				WHEN 'VVL_BLOODPR2_FL' THEN 'Blutdruck dia (WNPN)'
+				WHEN 'VVL_PULSE1_FL' THEN 'Puls (WNPN)'
+				WHEN 'VVL_ZVD_FD' THEN 'ZVD (WNPN)'
+				ELSE typ || ' (WNPN)'
+			END AS typ,
+			valfx
+		FROM n2330vdc
+		WHERE n2330vdc.pat = :pat
+			AND n2330vdc.typ IN (
+			'VVL_BLOODPR1_FL','VVL_BLOODPR2_FL','VVL_PULSE1_FL',
+			'VVL_BSG1H_FD','VVL_BSG2H_FD',
+			'VVL_TEMP1_FD','VVL_TEMP2LOC_FL',
+			'VVL_ZVD_FD'
+			)
+			AND docd &gt;= sysdate - :DaysLookBack
+			AND stat='A'
+			AND (SYSDATE &lt;= DATT OR DATT IS NULL)
+		)
+ORDER BY docd DESC, typ */
+	</sql>
+	<converter default="true">Convert-QueryToXML</converter>
+</notfalldatenmodul>

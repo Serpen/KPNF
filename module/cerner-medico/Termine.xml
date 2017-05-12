@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<notfalldatenmodul>
+	<name>Termine</name>
+	<version>1.0</version>
+	<maintainer>FEK, Serpen</maintainer>
+	<history />
+	<parameter>
+		<param>pat</param>
+		<param>DaysLookBack</param>
+	</parameter>
+	<xsl>
+		<type>termine</type>
+		<subtype>termin</subtype>
+		<columns>
+			<column id="datf"     type="text">Von</column>
+			<column id="datt"     type="text">Bis</column>
+			<column id="duration" type="text">Dauer</column>
+			<column id="des"      type="text">Beschreibung</column>
+			<column id="wds"      type="text">Leistungsstelle</column>
+			<column id="status"   type="text">Status</column>
+		</columns>
+	</xsl>
+	<sql>
+SELECT x1492evt.datf, x1492evt.datt, duration, x1492evt.des, x8112des.des as wds, x9291sta.des AS status
+FROM x1492evt
+  LEFT JOIN x8112des ON leiserv=wds AND rtpserv=dep
+  LEFT JOIN x9291sta USING (sta)
+WHERE pat = :pat
+AND x1492evt.datf BETWEEN TRUNC(SYSDATE) - :DaysLookBack AND TRUNC(SYSDATE) + :DaysLookBack
+AND ERRORD IS NULL
+ORDER BY x1492evt.datf
+	</sql>
+	<converter default="true">Convert-QueryToXML</converter>
+</notfalldatenmodul>

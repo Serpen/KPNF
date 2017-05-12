@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<notfalldatenmodul>
+	<name>Diagnosen</name>
+	<version>0.9.1</version>
+	<maintainer>FEK, Serpen</maintainer>
+	<history />
+	<parameter>
+		<param>pat</param>
+	</parameter>
+	<xsl>
+		<type>diagnoses</type>
+		<subtype>diag</subtype>
+		<headline>Diagnosen</headline>
+		<columns>
+			<column id="dit"  type="text">Typ</column>
+			<column id="ddc"  type="text">ICD</column>
+			<column id="ddep" type="text">Fachrichtung</column>
+			<column id="text" type="text">Text</column>
+		</columns>
+	</xsl>
+	<sql>
+	SELECT dia,dit,ddc,ddep,text FROM x1280dia WHERE pat=:pat ORDER BY mainmed DESC, mainadm DESC, maindrg DESC, control, ddc
+	</sql>
+	<converter default="true">Convert-QueryToXML</converter>
+</notfalldatenmodul>

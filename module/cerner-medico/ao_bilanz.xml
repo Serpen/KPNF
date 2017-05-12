@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<notfalldatenmodul>
+	<name>Ein- und Ausfuhr Bilanz</name>
+	<version>1.0</version>
+	<maintainer>FEK, Serpen</maintainer>
+	<history />
+	<parameter>
+		<param>pat</param>
+		<param>DaysLookBack</param>
+	</parameter>
+	<xsl>
+		<type>iao_bilanz</type>
+		<subtype>iao_bilanz_eintrag</subtype>
+		<headline>Ein- und Ausfuhr Bilanz</headline>
+		<columns>
+			<column id="valts" type="date">Datum</column>
+			<column id="typ"   type="text">Name</column>
+			<column id="val"   type="text">Wert</column>
+		</columns>
+	</xsl>
+	<sql>
+-- Explizit ausgerechnete Bilanz
+SELECT
+	TRUNC(docd) AS valts,
+	'Summe Einfuhr' AS typ,
+	sum(amnt) AS val
+FROM n2342itd
+	WHERE pat = :pat
+	AND state = 0
+	AND docd > SYSDATE - :DaysLookBack
+GROUP BY TRUNC(docd)
+
+UNION ALL
+
+SELECT
+	TRUNC(docd) AS valts,
+	'Summe Ausfuhr' AS typ,
+	sum(amo) AS val
+FROM n2346exc
+	WHERE pat = :pat
+	AND state = 0
+	AND docd > SYSDATE - :DaysLookBack
+GROUP BY TRUNC(docd)
+
+ORDER BY valts, typ
+	</sql>
+	<converter default="true">Convert-QueryToXML</converter>
+</notfalldatenmodul>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<notfalldatenmodul>
+	<name>Notizen</name>
+	<version>1.0</version>
+	<maintainer>FEK, Serpen</maintainer>
+	<history />
+	<parameter>
+		<param>pat</param>
+	</parameter>
+	<xsl>
+		<type>notizen</type>
+		<subtype>notiz</subtype>
+		<columns>
+			<column id="datum" type="date">Datum</column>
+			<column id="text"  type="text">Text</column>
+		</columns>
+	</xsl>
+	<sql>
+	SELECT ' ' AS datum, ' ' AS text FROM DUAL WHERE :pat = :pat
+	</sql>
+	<converter default="true">Convert-QueryToXML</converter>
+</notfalldatenmodul>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<notfalldatenmodul>
+	<name>Blutzucker</name>
+	<version>0.9</version>
+	<maintainer>FEK, Serpen</maintainer>
+	<history />
+	<parameter>
+		<param>pat</param>
+		<param>DaysLookBack</param>
+	</parameter>
+	<xsl>
+		<type>blutzuckers</type>
+		<subtype>blutzucker</subtype>
+		<columns>
+			<column id="docd" type="date">Datum</column>
+			<column id="blutzuckerwert"   type="text">Blutzuckerwert</column>
+			<column id="diab" type="text">Diab</column>
+			<column id="einheit" type="text">Einheit</column>
+			<column id="maximal" type="text">Minimal</column>
+			<column id="minimal" type="text">Maximal</column>
+			<column id="verantwortlicher" type="text">Verantwortlicher</column>
+			<column id="zusatz" type="text">Zusatz</column>
+		</columns>
+	</xsl>
+	<sql>
+SELECT 
+	docd,
+	x8201psr.namechr as Verantwortlicher,
+	sum(decode(typ,'BSG_BSGVAL_FD', valfx)) AS Blutzuckerwert,
+	sum(decode(typ,'BSG_BSGVALMAX_FD', valfx)) AS maximal,
+	sum(decode(typ,'BSG_BSGVALMIN_FD', valfx)) AS minimal,
+	'mg/dl' AS einheit, 
+	sum(decode(typ,'BSG_RESCNT1_FL', DECODE(valfx,2,0,1,1))) AS Zusatz,
+	sum(decode(typ,'BSG_RESCNT2_FL', valfx)) AS diab,
+	sum(decode(typ,'BSG_INSULPRAEP_FL', valfx)) AS insulin_praep,
+	sum(decode(typ,'BSG_INSULIE_FL', valfx)) AS insulin,
+	sum(decode(typ,'BSG_INSULINFO_CH', valfx)) AS insulin_info
+FROM n2330vdc
+	LEFT JOIN x8201psr ON x8201psr.psr = n2330vdc.resp 
+WHERE n2330vdc.pat = :pat
+	and n2330vdc.typ LIKE 'BSG%'
+	and n2330vdc.stat = 'A'
+	AND docd >= sysdate - :DaysLookBack
+GROUP BY can, pat, resp, x8201psr.namechr, docd, stat, valts
+ORDER BY docd DESC
+	</sql>
+	<converter default="true">Convert-QueryToXML</converter>
+</notfalldatenmodul>

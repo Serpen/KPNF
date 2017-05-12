@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<notfalldatenmodul>
+	<name>Zähler</name>
+	<version>1.0</version>
+	<maintainer>FEK, Serpen</maintainer>
+	<history />
+	<parameter>
+		<param>pat</param>
+	</parameter>
+	<xsl>
+		<type>counters</type>
+		<subtype>counter</subtype>
+		<columns>
+			<column id="cnt"     type="text">Name</column>
+			<column id="datf"    type="date">Von</column>
+			<column id="current" type="number">Aktuell</column>
+		</columns>
+	</xsl>
+	<sql>
+SELECT cnt, TRUNC(SYSDATE-datf+sval) AS cur, (datf-sval) AS datf
+FROM n2348cts
+WHERE pat = :pat
+AND storno=0
+	</sql>
+	<converter default="true">Convert-QueryToXML</converter>
+</notfalldatenmodul>

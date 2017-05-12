@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<notfalldatenmodul>
+	<name>Verlaufsdokumentation</name>
+	<version>0.9</version>
+	<maintainer>FEK, Serpen</maintainer>
+	<parameter>
+		<param>pat</param>
+		<param>DaysLookBack</param>
+	</parameter>
+	<xsl>
+		<type>verlaufsdokumentation</type>
+		<subtype>verlaufseintrag</subtype>
+		<columns>
+			<column id="datum" type="date">Datum</column>
+			<column id="dep"   type="text">FR</column>
+			<column id="wds"   type="text">Station</column>
+			<column id="wfc"   type="text">Benutzergruppe</column>
+			<column id="text"  type="text">Text</column>
+		</columns>
+	</xsl>
+	<sql>
+	SELECT
+		wfd, dat AS datum, dep, wds, wfc || '/' || wfv AS wfc, LISTAGG(text,'') WITHIN GROUP (ORDER BY no) AS text
+	FROM x2701wfd
+		LEFT JOIN x2702wft USING (wfd)
+		LEFT JOIN x2704dcv USING (wfd)
+	WHERE pat=:pat
+		AND stornomk=0
+		AND dat > SYSDATE - :DaysLookBack
+		AND x2702wft.control = 0 
+	GROUP BY wfd, dat, dep, wds, wfc || '/' || wfv, dat
+	ORDER BY dat DESC
+	</sql>
+	<converter default="true">Convert-QueryToXML</converter>
+</notfalldatenmodul>

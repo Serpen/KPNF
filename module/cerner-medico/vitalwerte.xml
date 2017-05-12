@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<notfalldatenmodul>
+	<name>Vitalparameter</name>
+	<version>1.0</version>
+	<maintainer>FEK, Serpen</maintainer>
+	<history />
+	<parameter>
+		<param>pat</param>
+		<param>DaysLookBack</param>
+	</parameter>
+	<xsl>
+		<type>vitalparameter</type>
+		<subtype>vitalparam</subtype>
+		<columns>
+			<column id="docd"  type="date">Datum</column>
+			<column id="rrsys" type="number">Systolischer Blutdruck</column>
+			<column id="rrdia" type="number">Diastolischer Blutdruck</column>
+			<column id="pulse" type="number">Puls</column>
+			<column id="tmp"   type="number">Temperatur</column>
+		</columns>
+	</xsl>
+	<sql>
+		SELECT docd, rrsys,rrdia,pulse,tmp FROM n2340bpt WHERE pat = :pat AND tmp IS NOT NULL AND docd &gt;= sysdate - :DaysLookBack ORDER BY docd
+	</sql>
+	<converter default="true">Convert-QueryToXML</converter>
+</notfalldatenmodul>

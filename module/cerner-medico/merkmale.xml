@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<notfalldatenmodul>
+	<name>Merkmale</name>
+	<version>0.9</version>
+	<maintainer>FEK, Serpen</maintainer>
+	<history />
+	<parameter>
+		<param>per</param>
+		<param>pat</param>
+	</parameter>
+	<xsl>
+		<type>merkmale</type>
+		<subtype>merkmal</subtype>
+		<columns>
+			<column id="bezug"  type="text">Bezug</column>
+			<column id="mkr"    type="text">Typ</column>
+			<column id="mkk"    type="text">Schluessel</column>
+			<column id="extext" type="text">Text</column>
+			<column id="datf"   type="date">Von</column>
+			<column id="datt"   type="date">Bis</column>
+		</columns>
+	</xsl>
+	<sql>
+SELECT 'Person' AS Bezug, mkr, mkk, extext, datf, datt
+FROM x1005pex
+	LEFT JOIN x1006pxt USING (per, no)
+WHERE per = :per
+	AND SYSDATE BETWEEN datf AND (datt + 5)
+
+UNION ALL
+
+SELECT 'Fall' AS Bezug, mkr, mkk, text AS extext, CRD AS datf, DATE '2099-12-31' AS datt
+FROM x1116ama
+WHERE pat = :pat
+
+ORDER BY mkr, mkk
+	</sql>
+	<converter default="true">Convert-QueryToXML</converter>
+</notfalldatenmodul>

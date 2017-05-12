@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<notfalldatenmodul>
+	<name>Koerpermaße</name>
+	<version>0.9.1</version>
+	<maintainer>FEK, Serpen</maintainer>
+	<history />
+	<parameter>
+		<param>pat</param>
+		<param>DaysLookBack</param>
+	</parameter>
+	<xsl>
+		<type>bmis</type>
+		<subtype>bmi</subtype>
+		<columns>
+			<column id="dat"    type="date">Datum</column>
+			<column id="weight" type="number">Gewicht</column>
+			<column id="height" type="number">Groeße</column>
+			<column id="bmi"    type="number">BMI</column>
+		</columns>
+	</xsl>
+	<sql>
+SELECT
+	docd as dat,
+	DECODE (typ,
+		'VVL_WEIGHT1_FD','Gewicht (WNPN)',
+		'VVL_HEIGHT_FD','Groesse (WNPN)',
+		'VVL_WWBMI_FD','BMI (WNPN)',
+		typ || ' (WNPN)'
+	) AS typ,
+	valfx || ' ' || (SELECT LISTAGG(n5800dva.des,'-') WITHIN GROUP (ORDER BY sortseq) FROM n2330vdc vdc2 JOIN n5800dva ON vdc2.valfx=n5800dva.dva AND dty='VVL_WGHTUNIT' WHERE vdc2.pat = vdc1.pat AND vdc1.typ='VVL_WEIGHT1_FD' AND vdc2.typ='VVL_WEIGHT2UNIT_FL' AND vdc1.vdc = vdc2.vdc-1 AND stat='A') as VALFX
+	-- Query mit vorheriger Zeile / nachfolgender Zeile
+	
+FROM n2330vdc vdc1
+WHERE pat = :pat
+	AND typ IN (
+		'VVL_HEIGHT_FD', 'VVL_WEIGHT1_FD', 'VVL_WWBMI_FD'
+	)
+	AND docd &gt;= sysdate - :DaysLookBack
+	AND stat='A'
+	AND (SYSDATE &lt;= DATT OR DATT IS NULL)
+
+
+ORDER BY dat
+	</sql>
+	<converter default="true">Convert-QueryToXML</converter>
+</notfalldatenmodul>

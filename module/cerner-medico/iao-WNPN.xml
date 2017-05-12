@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<notfalldatenmodul>
+	<name>Ein- und Ausfuhr</name>
+	<version>0.9.1</version>
+	<maintainer>FEK, Serpen</maintainer>
+	<history />
+	<parameter>
+		<param>pat</param>
+		<param>DaysLookBack</param>
+	</parameter>
+	<xsl>
+		<type>iaos</type>
+		<subtype>iao</subtype>
+		<headline>Ein- und Ausfuhr</headline>
+		<columns>
+			<column id="valts" type="date">Datum</column>
+			<column id="des"   type="text">Name</column>
+			<column id="val"   type="text">Wert</column>
+			<column id="namechr"  type="text">Verantwortlicher</column>
+		</columns>
+	</xsl>
+	<sql>
+WITH ueberleittabelle AS (
+SELECT 'IAO_URIN1QUAN_FL' AS typ,'' as dty, 'Urin Menge' AS des FROM DUAL
+UNION ALL
+SELECT 'IAO_URIN2DES_FL','IAO_URINDES', 'Urin Spezifikation 1' FROM DUAL
+UNION ALL
+SELECT 'IAO_URIN3STAT_FL','IAO_URINSM', 'Urin Geruch' FROM DUAL
+UNION ALL
+SELECT 'IAO_URINPH1_FD','', 'Urin PH-Wert' FROM DUAL
+UNION ALL
+SELECT 'IAO_VOMITUS1QUAN_FL','', 'Erbrechen Menge' FROM DUAL
+UNION ALL
+SELECT 'IAO_VOMITUS2STAT_FL','IAO_VMTSTAT', 'Erbrechen Typ' FROM DUAL
+UNION ALL
+SELECT 'IAO_LIQ1QUAN_FL','', 'Einfuhr Menge' FROM DUAL
+UNION ALL
+SELECT 'IAO_LIQ3TYP_FL','IAO_LIQTYP', 'Einfuhr Typ' FROM DUAL
+UNION ALL
+SELECT 'IAO_LIQ4DES_FL','IAO_LIQDES', 'Einfuhr Beschreibung' FROM DUAL
+UNION ALL
+SELECT 'IAO_LIQ2QUANMAX_FL','', 'Einfuhr Menge max' FROM DUAL
+UNION ALL
+SELECT 'IAO_DRAIN1QUAN_FL','', 'Drainage Menge' FROM DUAL
+UNION ALL
+SELECT 'IAO_DRAIN2DES_CH','', 'Drainage Beschreibung' FROM DUAL
+UNION ALL
+SELECT 'IAO_DRAIN4SDC_FL','', 'Drainage Nr' FROM DUAL
+UNION ALL
+SELECT 'IAO_MISC1QUAN_FL','', 'Sonstiges Menge' FROM DUAL
+UNION ALL
+SELECT 'IAO_MISC2TYP_FL','IAO_MISCTYP', 'Sonstiges Typ' FROM DUAL
+UNION ALL
+SELECT 'IAO_MISC3STAT_FL','IAO_MISCSTAT', 'Sonstiges Status' FROM DUAL
+UNION ALL
+SELECT 'IAO_KOSTFORM_FL','IAO_KOSTFORM', 'Kostform' FROM DUAL
+)
+
+SELECT
+  vdc,
+	valts,
+	ueberleittabelle.des,
+	n2330vdc.typ,
+	CASE
+		WHEN n2330vdc.typ = 'IAO_DRAIN2DES_CH' THEN (SELECT FTXT FROM n2991txt WHERE tab='IAO' and fld='DRAIN2DES' AND tpk=vdc) 
+		WHEN n5800dva.des IS NOT NULL THEN n5800dva.des
+		WHEN n5800dva.des IS NULL THEN to_char(valfx)
+	END as val,
+	x8201psr.namechr
+FROM n2330vdc
+	LEFT JOIN ueberleittabelle ON n2330vdc.typ = ueberleittabelle.typ
+	LEFT JOIN n5800dva ON valfx = n5800dva.dva -- AND n5800dva.dty=ueberleittabelle.dty
+  LEFT JOIN x8201psr ON x8201psr.psr = n2330vdc.resp
+WHERE n2330vdc.pat = :pat
+	and n2330vdc.stat = 'A'
+	and n2330vdc.typ LIKE 'IAO%' AND n2330vdc.typ NOT LIKE 'IAO_LIQBLC%'
+	AND n2330vdc.docd > SYSDATE - :DaysLookBack
+ORDER BY valts
+	</sql>
+	<converter default="true">Convert-QueryToXML</converter>
+</notfalldatenmodul>
