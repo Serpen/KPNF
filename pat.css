@@ -1,0 +1,58 @@
+/* Version 0.9.1 */
+
+table, th,  td {
+	padding: 3px;
+}
+
+table {
+	width:100%;
+	border-collapse:collapse;
+}
+
+th {
+	background-color:orange;
+	border: 1px solid black;
+}
+
+td {
+	border: 1px solid black;
+}
+
+.roweven {
+	background-color:lightgray
+}
+
+h1 {
+	text-decoration:underline;
+	text-align:center;
+}
+
+.number {
+	text-align: right;
+	padding-right:10px;
+}
+
+.date {
+	width: 115px;
+	text-align:right;
+}
+
+#tblPatient th {
+	text-align:left;
+	width: 250px;
+}
+
+#tblPatient td {
+	padding-left: 10px;
+}
+
+#toc {
+	border: none;
+}
+
+@media print
+{    
+    #toc {
+        display: none !important;
+    }
+}
