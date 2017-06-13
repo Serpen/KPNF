@@ -11,24 +11,24 @@
 #Datenbank Connector
 [type]$DBAdapterType = [Oracle.ManagedDataAccess.Client.OracleDataAdapter]
 
-#Verschlüsselung der Anmeldedaten ist PC-bezogen, muss also beim Rechnertausch geändert werden!
+#VerschlÃ¼sselung der Anmeldedaten ist PC-bezogen, muss also beim Rechnertausch geÃ¤ndert werden!
 $cred_db = Import-Clixml ("$PSScriptRoot\cred-db.xml")
 
 #Verbindungszeichenfolge zur KIS Datenbank, inklusive Passwort, am besten ein nur lesender Benutzer
 [System.Data.Common.DbConnection]$db_kis = New-Object Oracle.ManagedDataAccess.Client.OracleConnection "Data Source=datasourcename;User ID=$($cred_db.username);Password=$($cred_db.GetNetworkCredential().Password)"
-## Es werden zur Zeit noch keine verschlüsselten Anmeldedaten für den Datenbankserver unterstützt
+## Es werden zur Zeit noch keine verschlÃ¼sselten Anmeldedaten fÃ¼r den Datenbankserver unterstÃ¼tzt
 
-#Prüfung ob die Standarddatenbanktabellen ausgelesen werden können
+#PrÃ¼fung ob die Standarddatenbanktabellen ausgelesen werden kÃ¶nnen
 $BASIC_SQL_TEST = 'SELECT count(*) as anz FROM x1100pat,x1000per,x1102sta,x1280dia WHERE rownum < 2'
 
-#Arbeitsverzeichnis für die Ein-/Ausgabedateien
+#Arbeitsverzeichnis fÃ¼r die Ein-/Ausgabedateien
 [string]$NotfallDatenRootDir = $PsScriptRoot
 
 #Pfad zur ZipCompressor (7-ZIP)
 [string]$zipper = "$env:ProgramFiles\7-Zip\7z.exe"
 [string]$zipperArgCreate = "a"
 
-#relativer Pfad auf den Clients für das Notfallkonzept
+#relativer Pfad auf den Clients fÃ¼r das Notfallkonzept
 [string]$clientPathRoot = "c$\Notfalldaten_KIS"
 
 #Zeitspanne zur Werteabfrage in die Vergangenheit
@@ -42,10 +42,10 @@ $BASIC_SQL_TEST = 'SELECT count(*) as anz FROM x1100pat,x1000per,x1102sta,x1280d
 [string]$MailFrom = 'KIS_notfalldaten@example.com'
 [string[]]$MailTo = 'info@example.com'
 [string[]]$ErrorMailTo = 'info@example.com'
-#Verschlüsselung der Anmeldedaten ist PC-bezogen, muss also beim Rechnertausch geändert werden!
+#VerschlÃ¼sselung der Anmeldedaten ist PC-bezogen, muss also beim Rechnertausch geÃ¤ndert werden!
 #[PSCredential]$MailServerLogin = Import-Clixml ("$PSScriptRoot\cred-mail.xml")
 
-#XML Writer Einstellungen, Einrücken zum Debugging aktivieren
+#XML Writer Einstellungen, EinrÃ¼cken zum Debugging aktivieren
 [xml.xmlwriterSettings]$xmlset = New-Object Xml.XmlWriterSettings -Property @{Indent=$true}
 
 #Wieviele Meldungen sollen angezeigt und protokolliert werden
@@ -55,7 +55,7 @@ $BASIC_SQL_TEST = 'SELECT count(*) as anz FROM x1100pat,x1000per,x1102sta,x1280d
 $DateFormat = 'dd.MM.yyyy HH:mm:ss'
 $DBDateFormat = 'dd.MM.yyyy HH:mm'
 
-$Module = @(
+$KPNDModule = @(
 	'diagnosen.xml',
 	#'labor-last.xml',
 	#'medication.xml',
