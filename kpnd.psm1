@@ -723,8 +723,8 @@ function Write-DefinitionFiles {
         $xmlwriter.WriteEndElement() #table
     $xmlwriter.WriteEndElement() #xsl:template
 
-    foreach ($modFile in (ls "$PSScriptRoot\module\*.xml" | sort name)) {
-        [xml]$moduleXml = Get-Content $modfile
+    foreach ($modFile in $KPNDModule) {
+        [xml]$moduleXml = Get-Content "$PSScriptRoot\module\$modFile"
         [string]$moduleName = $moduleXml.notfalldatenmodul.xsl.type
 
         $Querys.Add($moduleName, $db_kis.CreateCommand())
