@@ -1,0 +1,84 @@
+10:43 07.08.2014	0.2		KatlunM				Erste Changelogversion
+	Ausgabe des ZIP Datei um einen Stundenstempel ergänzt
+	Geplanten Task auf Zeitintervall alle 3 Stunden ab, für 18 Stunden (bis 24 uhr) ergänzt
+
+15:40 07.08.2014	0.3		KatlunM, GoschA		Merkmale
+	Abfrage um [Personennummer x1000per.per] = $myper ergänzt
+	Merkmale aus der x1005pex [Zusatzdaten zur Person] hinzugefügt
+	Dateinamen mit 24h Stundenformat korrigiert
+	
+07:24 08.08.2014	0.3.1	KatlunM				Merkmale mit LEFT JOIN
+	Die Verknüpfung mit der x1006pxt [Zusatzinfos zur Person] erfolgt nun als LEFT JOIN sodass die Tabelle nur optional genutzt wird
+	Link zur Merkmalsüberschrift ergänzt
+	
+10:29 08.08.2014	0.4		KatlunM				Dateiexport auf Rechner
+	Export der Dateien auf Stationsbezogenen Rechner über die Notfallpcs.csv realisiert
+
+14:27 12.08.2014	0.4.0.1	KatlunM				Variable für den Clientpfad
+	Verknüpfungen zu den Dateipfaden auf den PCs generiert
+
+16:23 18.08.2014	0.5		KatlunM				Diverse Siemens Fieberkurvenscript angepasst
+	Umstellung der XSLT auf templates mit foreach Schleifen zur einfacheren Handhabung
+	Scripte in SQL Ordner umgeleitet
+	Parameter wdsFilter für Skript ergänzt
+	Es wurden diverse Skripte aus der Siemens Fieberkruve angepasst,
+	leider war keine direkte 1:1 Kopie möglich, Fehler im Siemensscript in Textdatei dokumentiert
+	
+14:59 21.08.2014	0.5.1	KatlunM				Anordnungen, Blutzucker und Query2XML
+	Anordnungen und Blutzucker von Gross (Siemens) 1:1 übernommen und angezeigt
+	Query2XML-Funktion erstellt, die die Daten direkt von SQL in XML umwandelt
+	Die Funktionen aus dem Modul Medico direkt in das Script importiert
+
+15:27 25.08.2014	0.5.2	KatlunM				Stuhlgang und Dokumentation
+
+16:00 28.08.2014	0.6		KatlunM				Ein- und Ausfuhr
+	Ein- und Ausfuhr der Siemens Skripte komplett umgeschrieben
+	Um eine temporäre Tabelle nms_tmp_n5751dtd ergänzt, die als Überleitung zwischen n2330vdc.typ und n5800dva dient
+
+08:27 29.08.2014	0.6.1	KatlunM				Fehlerabfang Medico Offline
+08:22 12.09.2014	0.6.2	KatlunM				Wiki Anleitung: http://fekwiki/wiki/Medico_Notfallkonzept
+10:35 29.09.2014	0.6.3	KatlunM				Ping Timeout auf 10 Sekunden erhöht
+15:03 21.10.2014	0.6.4	KatlunM				Bereinigung des Archivverzeichnisses am Ende des Monats
+15:35 21.10.2014	0.6.5	KatlunM				Konfiguration in Datei config.ps1 ausgelagert
+15:40 21.10.2014	0.6.6	KatlunM				Test-HostAlive entfernt
+12:08 06.11.2014	0.6.7	KatlunM				Copy2Host Job mit Platzhalter für Substationen versehen (z.B. 76Ü)
+10:59 07.11.2014	0.7		KatlunM				
+												Temporäre Tabelle nms_tmp_n5751dtd durch WITH Clause ersetzt, es kann nun auch wieder mit einem ro Benutzer zugegriffen werden
+												Mailserver in Config.ps1 ausgelagert
+												InstallCheck prüft Mailserver
+14:50 05.03.2015	0.7.1	KatlunM				Bitmaske für die Wochentage bei der Medikationsgabe korrigiert, die Werte > 64 werden nun vorher abgefangen												
+07:55 06.03.2015	0.7.2	KatlunM				Copy Job so umgebaut das auf den Clients nurnoch die Stationsdaten gelöscht werden, sodass mehrer Stationen übertragen werden können
+11:36 10.03.2015	0.7.3	KatlunM				Read-MedicoScalar zur Optimierung (Krankheitstage) hinzugefuegt
+												Trim im Labor SQL für den Namen hinzugefügt
+11:59 07.04.2015	0.7.4	KatlunM				KrankTage, Patientenabfrage ausgelagert in SQL Datei und effizienter abgefragt
+												ConvertFrom-XslToHTML in Funcs.ps1 aufgenommen
+												Mit Visual Studio manuell eine Datei validiert und DTD Schema erstellt
+08:00 07.11.2016	0.8		KatlunM				Auf Module umgestellt
+												SQL Abfragen auf parametrisierte Querys umgestellt und direkt in DbCommand Objekte verwandelt, die mit prepare vorbereitet werden
+												Datumsformatierung zentralisiert
+												Einheitliche Protokoll Funktion eingeführt
+												LogTime durch Stopwatch ersetzt
+												
+												SQL Abfragen:
+													Anordnungen überarbeitet und WNPN und PPM zusammengeführt
+													Blutzucker überarbeitet
+													BMI überarbeitet und WNPN und PPM zusammengeführt
+													IAO mit WNPN und PPM zusammengeführt
+													IAO_Bilanz mit WNPN und PPM zusammengeführt
+													Fall- und Personenbezogene Merkmale zusammengeführt
+													Vitalwerte mit WNPN und PPM zusammengeführt
+													Mehrzeilige Verlaufsdokumentation in wfd.sql ergänzt
+													Medikationsgenerierung mehr in SQL Abfrage verschoben
+													
+12:40 27.02.2017	0.9.1	KatlunM				WNPN Abfragen deaktiviert
+												Fieberkurven Freitexte Modul erstellt
+												Pflegemaßnahmenmodul erstellt
+												Notizmodul erstellt
+												Module als Kreuztabelle: Vitalwerte, Körpermaße
+												kleiner Bugs und Zeichensatzfehler behoben, generelle Umstellung auf UTF-8
+								
+09:46 27.03.2017	1.0		KatlunM				Medikationsabfrage gemäß Hotfix H23001702271 angepasst
+												Module werden in der Config Datei der Reihenfolge nach sortiert
+												Anpassung um verschiedene Datenbank Connection zu unterstützen und Vorbereitung auf beliebige KIS Systeme
+												Installcheck listet verfügbare Datenbank Connections und Adapter auf
+												Verschlüsselung der Passwörter (DB,Mail) als Serialized.PSCredential
