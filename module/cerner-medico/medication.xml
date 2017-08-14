@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <notfalldatenmodul>
 	<name>Medikation</name>
-	<version>0.9</version>
+	<version>1.0</version>
 	<maintainer>FEK, Serpen</maintainer>
 	<history />
 	<parameter>
@@ -27,13 +27,13 @@
 	</xsl>
 	<sql>
 SELECT 
-	m2500mdc.mdc,
-	m2500mdc.des,
-	regexp_substr((SELECT LISTAGG(attval,'') WITHIN GROUP (ORDER BY attcol,attrow) wirkstoff FROM m2501mda WHERE m2501mda.att='MED_DESXL' AND m2501mda.mdc=m2500mdc.mdc AND attcol=0), '\[(.*)\]', 1, 1, 'i',1) AS wirkstoff,
-	(SELECT LISTAGG(attval,'') WITHIN GROUP (ORDER BY attcol,attrow) ADM_INFO FROM m2504doa WHERE m2504doa.att='ADM_INFO' AND m2504doa.dos=m2502mdo.dos AND attcol=0) AS ADM_INFO,
-	(SELECT LISTAGG(attval,'') WITHIN GROUP (ORDER BY attcol,attrow) ADD_ONDEMAND FROM m2504doa WHERE m2504doa.att='ADD_ONDEMAND' AND m2504doa.dos=m2502mdo.dos AND attcol=0) AS ADD_ONDEMAND,
-	(SELECT LISTAGG(attval,'') WITHIN GROUP (ORDER BY attcol,attrow) DOS_COMMENT FROM m2504doa WHERE m2504doa.att='DOS_COMMENT' AND m2504doa.dos=m2502mdo.dos) AS DOS_COMMENT,
-	CASE (SELECT LISTAGG(attval,'') WITHIN GROUP (ORDER BY attcol,attrow) ADM_ROA FROM m2504doa WHERE m2504doa.att='ADM_ROA' AND m2504doa.dos=m2502mdo.dos AND attcol=0)
+	m2530mdc.mdc,
+	m2530mdc.des,
+	regexp_substr((SELECT LISTAGG(attval,'') WITHIN GROUP (ORDER BY attcol,attrow) wirkstoff FROM m2501mda WHERE m2501mda.att='MED_DESXL' AND m2501mda.mdc=m2530mdc.mdc AND attcol=0), '\[(.*)\]', 1, 1, 'i',1) AS wirkstoff,
+	add_info_table.attval AS ADM_INFO,
+	add_ondemand_table.attval AS ADD_ONDEMAND,
+	(SELECT LISTAGG(attval,'') WITHIN GROUP (ORDER BY attcol,attrow) DOS_COMMENT FROM m2504doa WHERE m2504doa.att='DOS_COMMENT' AND m2504doa.dos=m2531dos.dos) AS DOS_COMMENT,
+	CASE adm_roa_table.attval
 		WHEN 'T0029A4%OR' THEN 'oral'
 		WHEN 'T002AF2%SUB' THEN 'subcutan'
 		WHEN 'T0023CA%IVN' THEN 'i.v.'
@@ -45,12 +45,12 @@ SELECT
 		WHEN 'GA00B71%EX' THEN 'topisch/extern'
 		WHEN 'T002287%PA' THEN 'parenteral'
 		WHEN 'V0001B1%INH' THEN 'inhalativ'
-		ELSE (SELECT LISTAGG(attval,'') WITHIN GROUP (ORDER BY attrow) ADM_ROA FROM m2504doa WHERE m2504doa.att='ADM_ROA' AND m2504doa.dos=m2502mdo.dos AND attcol=0)
+		ELSE adm_roa_table.attval
 	END AS ADM_ROA,
 	CASE 
-		WHEN SYSDATE &gt; m2503dos.datt THEN 'abgesetzt'
+		WHEN SYSDATE &gt; m2531dos.datt THEN 'abgesetzt'
 	ELSE
-		CASE m2503dos.status
+		CASE m2531dos.state
 			WHEN 0 THEN 'aktiv'
 			WHEN 1 THEN 'vorgeschlagen'
 			WHEN 5 THEN 'pausiert'
@@ -59,25 +59,25 @@ SELECT
 			ELSE 'unbekannt'
 		END
 	END AS Status,
-	m2503dos.datf AS datf,
-	m2503dos.datt AS datt,
-	m2506ser.sertype,
-	m2506ser.weekdays,
-	m2506ser.periodicity,
+	m2531dos.datf AS datf,
+	m2531dos.datt AS datt,
+	m2531dos.sertype,
+	m2531dos.weekdays,
+	m2531dos.periodicity,
 	x8201psr.namechr as orderer,
-	m2503dos.orderts AS orderts
-FROM m2500mdc
-	JOIN m2502mdo ON m2500mdc.mdc = m2502mdo.mdc
-	JOIN m2503dos ON m2502mdo.dos = m2503dos.dos
-	JOIN m2505dsr ON m2502mdo.dos = m2505dsr.dos
-	JOIN m2506ser USING (ser)
-	JOIN x8201psr ON x8201psr.psr = m2503dos.orderer
+	m2531dos.orderts AS orderts
+FROM m2530mdc
+	JOIN m2531dos ON m2530mdc.mdc = m2531dos.mdc
+	LEFT JOIN m2504doa adm_roa_table ON adm_roa_table.dos=m2531dos.dos AND adm_roa_table.att='ADM_ROA' AND adm_roa_table.attcol=0 AND adm_roa_table.attrow=0
+	LEFT JOIN m2504doa add_ondemand_table ON add_ondemand_table.dos=m2531dos.dos AND add_ondemand_table.att='ADD_ONDEMAND' AND add_ondemand_table.attcol=0 AND add_ondemand_table.attrow=0
+	LEFT JOIN m2504doa add_info_table ON add_info_table.dos=m2531dos.dos AND add_info_table.att='ADM_INFO' AND add_info_table.attcol=0 AND add_info_table.attrow=0
+	JOIN x8201psr ON x8201psr.psr = m2531dos.orderer
 WHERE
 	per = :per
-	AND doctype = 'PAT'
-	AND docunit = :pat
-	AND SYSDATE BETWEEN (m2503dos.datf-5) AND m2503dos.datt
-	AND NOT m2503dos.status = -5 --stoniert
+	AND pat = :pat
+	AND SYSDATE BETWEEN (m2531dos.datf-5) AND m2531dos.datt
+	AND psctype = 0 --Kliniksmedikation
+	AND NOT m2531dos.state = -5 --stoniert
 ORDER BY UPPER(des)
 	</sql>
 	<converter default="true">Convert-MedikationToXML</converter>
