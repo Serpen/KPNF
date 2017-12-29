@@ -1,7 +1,7 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <notfalldatenmodul>
 	<name>Zähler</name>
-	<version>1.0</version>
+	<version>1.1</version>
 	<maintainer>FEK, Serpen</maintainer>
 	<history />
 	<parameter>
@@ -13,7 +13,7 @@
 		<columns>
 			<column id="cnt"     type="text">Name</column>
 			<column id="datf"    type="date">Von</column>
-			<column id="current" type="number">Aktuell</column>
+			<column id="cur" type="number">Aktuell</column>
 		</columns>
 	</xsl>
 	<sql>
