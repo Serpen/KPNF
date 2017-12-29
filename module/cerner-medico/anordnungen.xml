@@ -1,7 +1,7 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <notfalldatenmodul>
 	<name>Anordnungen</name>
-	<version>1.0</version>
+	<version>1.1</version>
 	<maintainer>FEK, Serpen</maintainer>
 	<history />
 	<parameter>
@@ -26,7 +26,7 @@ SELECT
 	goald,
 	n1210don.crd as crd,
 	des as namechr,
-	CASE state
+	CASE n1210don.state
 		WHEN 10 THEN 'Nicht bestätigt'
 		WHEN 20 THEN '(Von Anordner) bestätigt'
 		WHEN 30 THEN 'in Ausarbeitung'
@@ -40,7 +40,7 @@ FROM n1200dor
 WHERE 
 	pat = :pat
 	AND (greatest(goald,docd) >= SYSDATE - :DaysLookBack
-		OR state &lt; 40)
+		OR n1210don.state &lt; 40)
 
 ORDER BY goald, srvtxt
 	</sql>
