@@ -1,7 +1,7 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <notfalldatenmodul>
 	<name>Pflegemaßnahmen</name>
-	<version>0.9.1</version>
+	<version>1.1</version>
 	<maintainer>FEK, Serpen</maintainer>
 	<history />
 	<parameter>
@@ -21,10 +21,15 @@
 	</xsl>
 	<sql>
 SELECT n7010srv.des AS des1, n7002prg.des AS des2, n1011sps.datf, n1011sps.datt, dur,
-	CASE to_char(details)
-		WHEN '&lt;?xml version="1.0"?&gt;&lt;Root&gt;&lt;Items&gt;&lt;Typ0 /&gt;&lt;/Items&gt;&lt;/Root&gt;' THEN 'bei Bedarf'
-		WHEN '&lt;?xml version="1.0"?&gt;&lt;Root&gt;&lt;Items&gt;&lt;Typ7&gt;&lt;NOT&gt;1&lt;/NOT&gt;&lt;/Typ7&gt;&lt;/Items&gt;&lt;/Root&gt;' THEN '1 malige Durchfuehrung'
-		ELSE 'unbekanntes Serienschema'
+	CASE 
+		WHEN to_char(details) = '&lt;?xml version="1.0"?&gt;&lt;Root&gt;&lt;Items&gt;&lt;Typ0 /&gt;&lt;/Items&gt;&lt;/Root&gt;' THEN 'bei Bedarf'
+		WHEN regexp_like(to_char(details),'\&lt;\?xml version\=\"1\.0\"\?\&gt;\&lt;Root\&gt;\&lt;Items\&gt;(\&lt;Typ1\&gt;\&lt;ET\&gt;[[:digit:]:.+]+\&lt;\/ET\&gt;\&lt;\/Typ1\&gt;)+\&lt;\/Items\&gt;\&lt;\/Root\&gt;') THEN '? mal täglich um ?'
+		WHEN regexp_like(to_char(details),'\&lt;\?xml version\=\"1\.0\"\?\&gt;\&lt;Root\&gt;\&lt;Items\&gt;(\&lt;Typ2\&gt;\&lt;WD\&gt;\d\&lt;\/WD\&gt;\&lt;ET\&gt;[[:digit:]:.+]+\&lt;\/ET\&gt;\&lt;\/Typ2\&gt;)+\&lt;\/Items\&gt;\&lt;\/Root\&gt;') THEN '? mal wöchentlich'
+		WHEN regexp_like(to_char(details),'\&lt;\?xml version\=\"1\.0\"\?\&gt;\&lt;Root\&gt;\&lt;Items\&gt;\&lt;Typ4\&gt;\&lt;NOT\&gt;\d&lt;/NOT&gt;&lt;SP&gt;[[:digit:]:.+]+\&lt;\/SP\&gt;\&lt;\/Typ4\&gt;\&lt;\/Items\&gt;\&lt;\/Root\&gt;') THEN 'Alle ? Stunden um ?'
+		WHEN regexp_like(to_char(details),'\&lt;\?xml version\=\"1\.0\"\?\&gt;\&lt;Root\&gt;\&lt;Items\&gt;\&lt;Typ5\&gt;\&lt;NOT\&gt;\d&lt;/NOT&gt;&lt;ET&gt;[[:digit:]:.+]+\&lt;\/ET\&gt;\&lt;\/Typ5\&gt;\&lt;\/Items\&gt;\&lt;\/Root\&gt;') THEN 'Alle ? Tage um ?'
+		WHEN regexp_like(to_char(details),'\&lt;\?xml version\=\"1\.0\"\?\&gt;\&lt;Root\&gt;\&lt;Items\&gt;\&lt;Typ6\&gt;\&lt;NOT\&gt;\d&lt;/NOT&gt;&lt;SP&gt;[[:digit:]:.+]+\&lt;\/SP\&gt;\&lt;\/Typ6\&gt;\&lt;\/Items\&gt;\&lt;\/Root\&gt;') THEN 'Alle ? Minuten um ?'
+		WHEN regexp_like(to_char(details),'\&lt;\?xml version\=\"1\.0\"\?\&gt;\&lt;Root\&gt;\&lt;Items\&gt;\&lt;Typ7\&gt;\&lt;NOT\&gt;\d\&lt;\/NOT\&gt;\&lt;\/Typ7\&gt;\&lt;\/Items\&gt;\&lt;\/Root\&gt;') THEN '? malige Durchfuehrung'
+		ELSE to_char(details)
 	END AS details
 FROM n1010spl
   JOIN n1011sps USING (spl)
