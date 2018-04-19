@@ -1,4 +1,4 @@
-﻿Set-Variable -Name FileVersion -Value ([Version]'1.0') -Option Constant 
+Set-Variable -Name FileVersion -Value ([Version]'1.0') -Option Constant 
 
 Set-StrictMode -Version Latest
 
@@ -50,7 +50,6 @@ Write-Protokoll " $($db_kis.GetType().Name) Version $($db_kis.GetType().assembly
 
 Write-Protokoll "Datenbankverbindung herstellen"
 if ($db_kis.state -ne 'Open') {
-    #Datenbank Verbindung öffnen
     [void] $db_kis.open()
 }
 
@@ -159,11 +158,13 @@ $allePat | foreach {
         foreach ($modparam in $mod.value.notfalldatenmodul.parameter.ChildNodes) {
             $parameterUebergabe[$modparam.InnerText] = Get-Variable -Name "my$($modparam.InnerText)" -ValueOnly
         }
+
+        $_typeX = $mod.value.notfalldatenmodul.xsl.type
         if ($converterFunction -eq 'Convert-QueryToXML') {
-            Convert-QueryToXML -query $($Querys[$mod.value.notfalldatenmodul.xsl.type]) -para $parameterUebergabe -xmlwriter $xml -type $($Mod.value.notfalldatenmodul.xsl.type) -subtype $($Mod.value.notfalldatenmodul.xsl.subtype)
+            Convert-QueryToXML -query $($Querys[$_typeX]) -para $parameterUebergabe -xmlwriter $xml -type $($_typeX) -subtype $($Mod.value.notfalldatenmodul.xsl.subtype)
         } else {
             if (Test-Path "function:\$converterFunction") {
-                & $converterFunction -query ($Querys[$mod.value.notfalldatenmodul.xsl.type]) -para $parameterUebergabe -xmlwriter $xml -type $($Mod.value.notfalldatenmodul.xsl.type) -subtype $($Mod.value.notfalldatenmodul.xsl.subtype)
+                & $converterFunction -query ($Querys[$_typeX]) -para $parameterUebergabe -xmlwriter $xml -type $($_typeX) -subtype $($Mod.value.notfalldatenmodul.xsl.subtype)
             } else {
                 Write-Protokoll -GenerateError "$($mod.value.notfalldatenmodul.Name) verwendet einen nicht unterstützten Converter"
             }
@@ -600,14 +601,14 @@ function Write-DefinitionFiles {
                     $xmlwriter.WriteAttributeString("id","toc")
 
                     $xmlwriter.WriteStartElement("ol")
-                        foreach ($modFile in (ls "$PSScriptRoot\module\*.xml" | sort name)) {
-                            [xml]$moduleXml = Get-Content $modfile
-                            [string]$moduleName = $moduleXml.notfalldatenmodul.xsl.type
+                        #foreach ($modFile in (ls "$PSScriptRoot\module\*.xml" -rec | sort name)) {
+                        foreach ($moduleXml in $Modules.GetEnumerator()) {
+                            [string]$moduleName = $moduleXml.value.notfalldatenmodul.xsl.type
 
                             $xmlwriter.WriteStartElement("li")
                                 $xmlwriter.WriteStartElement("a")
                                     $xmlwriter.WriteAttributeString("href","#$moduleName")
-                                    $xmlwriter.WriteString($moduleXml.notfalldatenmodul.name)
+                                    $xmlwriter.WriteString($moduleXml.value.notfalldatenmodul.name)
                                 $xmlwriter.WriteEndElement() #a
                             $xmlwriter.WriteEndElement() #li
                         } #end foreach
@@ -723,8 +724,11 @@ function Write-DefinitionFiles {
         $xmlwriter.WriteEndElement() #table
     $xmlwriter.WriteEndElement() #xsl:template
 
+    #foreach ($modFile in (ls "$PSScriptRoot\module\*.xml" | sort name)) {
     foreach ($modFile in $KPNDModule) {
+        #[xml]$moduleXml = Get-Content $modfile
         [xml]$moduleXml = Get-Content "$PSScriptRoot\module\$modFile"
+		
         [string]$moduleName = $moduleXml.notfalldatenmodul.xsl.type
 
         $Querys.Add($moduleName, $db_kis.CreateCommand())
