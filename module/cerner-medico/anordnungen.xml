@@ -39,7 +39,8 @@ FROM n1200dor
 	JOIN x8701res ON ordering=resid
 WHERE 
 	pat = :pat
-	AND (greatest(goald,docd) >= SYSDATE - :DaysLookBack
+	AND NOT n1210don.state = -1
+	AND (greatest(goald,docd) &gt;= SYSDATE - :DaysLookBack
 		OR n1210don.state &lt; 40)
 
 ORDER BY goald, srvtxt
