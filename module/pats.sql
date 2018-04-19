@@ -1,4 +1,4 @@
-﻿SELECT 
+SELECT 
 	pat, 
 	per, 
 	x1100pat.namechr, 
@@ -26,9 +26,9 @@ WHERE
 	SYSDATE BETWEEN admd AND disd
 	AND admerrord is null
 	AND reservmk = 0
-	AND typ='S'     --Stationäre
+	AND (typ='S' OR typ='ST')      --Stationäre
 	AND cha<>'BGL'  --Begleitpersonen
-	AND wds<>'TEST' --Teststation
+--	AND wds<>'TEST' --Teststation
 	AND wds LIKE :wdsFilter
 	AND pat LIKE :patFilter
 	AND x1100pat.man=:Mandant --Nur Mandant 1
